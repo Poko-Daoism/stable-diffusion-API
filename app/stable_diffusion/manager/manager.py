@@ -8,7 +8,7 @@ torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionXLPipeline
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -39,7 +39,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
     logger.info(f"Repo: {repo}")
-    pipe = DiffusionPipeline.from_pretrained(
+    pipe = StableDiffusionXLPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
         variant="fp16",
@@ -98,8 +98,7 @@ class StableDiffusionManager:
             del task["seed"]
             images = pipeline(
                 prompt='multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.',
-                num_inference_steps=10,
-                seed=1232323,
+                num_inference_steps=10
             ).images
             if device != "cpu":
                 torch.cuda.empty_cache()
