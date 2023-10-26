@@ -43,8 +43,9 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         variant="fp16",
         use_safetensors=True,
         # revision="fp16",
-        # custom_pipeline="lpw_stable_diffusion",
+        custom_pipeline="lpw_stable_diffusion_xl",
     )
+
 
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     pipe.safety_checker = lambda images, clip_input: (images, False)
