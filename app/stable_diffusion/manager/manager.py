@@ -2,13 +2,12 @@ import os
 from functools import lru_cache
 import typing as T
 import torch
-from loguru import logger
 
 torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionXLPipeline
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -38,19 +37,15 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
-    logger.info(f"Repo: {repo}")
-    pipe = StableDiffusionXLPipeline.from_pretrained(
+    pipe = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
-        variant="fp16",
-        use_safetensors=True,
-        # revision="fp16",
-        # custom_pipeline="lpw_stable_diffusion_xl",
+        revision="fp16",
+        custom_pipeline="lpw_stable_diffusion",
     )
 
-
-    # pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    # pipe.safety_checker = lambda images, clip_input: (images, False)
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
         pipe.enable_attention_slicing()
@@ -82,7 +77,7 @@ class StableDiffusionManager:
         task = batch[0]
         pipeline = self.pipe
         if isinstance(task, Text2ImageTask):
-            pipeline = self.pipe
+            pipeline = self.pipe.text2img
         elif isinstance(task, Image2ImageTask):
             pipeline = self.pipe.img2img
         elif isinstance(task, InpaintTask):
@@ -93,11 +88,12 @@ class StableDiffusionManager:
         device = env.CUDA_DEVICE
 
         generator = self._get_generator(task, device)
-        task = task.dict()
-        del task["seed"]
-        images = pipeline(**task, generator=generator).images
-        if device != "cpu":
-            torch.cuda.empty_cache()
+        with torch.autocast("cuda" if device != "cpu" else "cpu"):
+            task = task.dict()
+            del task["seed"]
+            images = pipeline(**task, generator=generator).images
+            if device != "cpu":
+                torch.cuda.empty_cache()
 
         return [images]
 

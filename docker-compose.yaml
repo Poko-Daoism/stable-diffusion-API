@@ -16,7 +16,7 @@ services:
       - /home/{USERNAME}/.cache/huggingface:/root/.cache/huggingface
       - ./static:/app/static
     environment:
-      MODEL_ID: "stabilityai/stable-diffusion-xl-base-1.0"
+      MODEL_ID: "stabilityai/stable-diffusion-2-1"
       MB_BATCH_SIZE: 1
 
       CUDA_DEVICE: cuda
@@ -49,6 +49,6 @@ services:
       - 8501
     environment:
       TZ: Asia/Seoul
-      API_URL: http://api:3000
+      API_URL: http://44.192.70.46:3000
       ST_TITLE: Stable-diffusion
       ST_WIDE: "True"
