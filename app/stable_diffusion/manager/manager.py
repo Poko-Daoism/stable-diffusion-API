@@ -47,13 +47,15 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     )
 
 
-    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    pipe.safety_checker = lambda images, clip_input: (images, False)
+    # pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    # pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
         pipe.enable_attention_slicing()
 
-    pipe = pipe.to(device)
+    pipe.enable_model_cpu_offload()
+    pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead", fullgraph=True)
+    # pipe = pipe.to(device)
     return pipe
 
 
