@@ -41,9 +41,9 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         repo,
         torch_dtype=torch.float16,
         variant="fp16",
-        # use_safetensors=True,
+        use_safetensors=True,
         # revision="fp16",
-        custom_pipeline="lpw_stable_diffusion",
+        # custom_pipeline="lpw_stable_diffusion",
     )
 
 
@@ -80,7 +80,7 @@ class StableDiffusionManager:
         task = batch[0]
         pipeline = self.pipe
         if isinstance(task, Text2ImageTask):
-            pipeline = self.pipe.text2img
+            pipeline = self.pipe
         elif isinstance(task, Image2ImageTask):
             pipeline = self.pipe.img2img
         elif isinstance(task, InpaintTask):
@@ -91,12 +91,11 @@ class StableDiffusionManager:
         device = env.CUDA_DEVICE
 
         generator = self._get_generator(task, device)
-        with torch.autocast("cuda" if device != "cpu" else "cpu"):
-            task = task.dict()
-            del task["seed"]
-            images = pipeline(**task, generator=generator).images
-            if device != "cpu":
-                torch.cuda.empty_cache()
+        task = task.dict()
+        del task["seed"]
+        images = pipeline(**task, generator=generator).images
+        if device != "cpu":
+            torch.cuda.empty_cache()
 
         return [images]
 
