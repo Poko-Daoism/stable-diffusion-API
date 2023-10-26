@@ -7,7 +7,7 @@ torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import DPMSolverMultistepScheduler, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -37,34 +37,24 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
-    logger.info(f"Repo: {repo}")
-    text2img = StableDiffusionXLPipeline.from_pretrained(
+    pipe = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
-        variant="fp16",
-        use_safetensors=True,
-        # revision="fp16",
-        # custom_pipeline="lpw_stable_diffusion_xl",
+        # variant="fp16",
+        # use_safetensors=True,
+        revision="fp16",
+        custom_pipeline="lpw_stable_diffusion",
     )
 
-    img2img = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-        'stabilityai/stable-diffusion-xl-refiner-1.0',
-        torch_dtype=torch.float16,
-        variant="fp16",
-        use_safetensors=True,
-        # revision="fp16",
-        # custom_pipeline="lpw_stable_diffusion_xl",
-    )
 
-    # text2img.safety_checker = lambda images, clip_input: (images, False)
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
-        text2img.enable_attention_slicing()
-        img2img.enable_attention_slicing()
+        pipe.enable_attention_slicing()
 
-    text2img = text2img.to(device)
-    img2img = img2img.to(device)
-    return dict(text2img=text2img, img2img=img2img)
+    pipe = pipe.to(device)
+    return pipe
 
 
 build_pipeline(
@@ -90,22 +80,23 @@ class StableDiffusionManager:
         task = batch[0]
         pipeline = self.pipe
         if isinstance(task, Text2ImageTask):
-            pipeline = self.pipe['text2img']
+            pipeline = self.pipe.text2img
         elif isinstance(task, Image2ImageTask):
-            pipeline = self.pipe['img2img']
+            pipeline = self.pipe.img2img
         elif isinstance(task, InpaintTask):
-            pipeline = self.pipe['inpaint']
+            pipeline = self.pipe.inpaint
         else:
             raise NotImplementedError
 
         device = env.CUDA_DEVICE
 
         generator = self._get_generator(task, device)
-        task = task.dict()
-        del task["seed"]
-        images = pipeline(**task, generator=generator).images
-        if device != "cpu":
-            torch.cuda.empty_cache()
+        with torch.autocast("cuda" if device != "cpu" else "cpu"):
+            task = task.dict()
+            del task["seed"]
+            images = pipeline(**task, generator=generator).images
+            if device != "cpu":
+                torch.cuda.empty_cache()
 
         return [images]
 
