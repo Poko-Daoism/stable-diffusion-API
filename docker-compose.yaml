@@ -16,7 +16,7 @@ services:
       - /home/{USERNAME}/.cache/huggingface:/root/.cache/huggingface
       - ./static:/app/static
     environment:
-      MODEL_ID: "stabilityai/stable-diffusion-2-1"
+      MODEL_ID: "stabilityai/stable-diffusion-xl-base-1.0"
       MB_BATCH_SIZE: 1
 
       CUDA_DEVICE: cuda
