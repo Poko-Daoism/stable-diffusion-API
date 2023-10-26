@@ -42,10 +42,10 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     pipe = StableDiffusionXLPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
-        # variant="fp16",
-        # use_safetensors=True,
-        revision="fp16",
-        custom_pipeline="lpw_stable_diffusion",
+        variant="fp16",
+        use_safetensors=True,
+        # revision="fp16",
+        # custom_pipeline="lpw_stable_diffusion_xl",
     )
 
 
@@ -82,7 +82,7 @@ class StableDiffusionManager:
         task = batch[0]
         pipeline = self.pipe
         if isinstance(task, Text2ImageTask):
-            pipeline = self.pipe.text2img
+            pipeline = self.pipe
         elif isinstance(task, Image2ImageTask):
             pipeline = self.pipe.img2img
         elif isinstance(task, InpaintTask):
