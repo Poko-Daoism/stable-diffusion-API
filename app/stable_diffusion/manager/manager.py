@@ -100,6 +100,7 @@ class StableDiffusionManager:
                 prompt='multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.',
                 num_inference_steps=10
             ).images
+            images[0].save("astronaut.png")
             if device != "cpu":
                 torch.cuda.empty_cache()
 
