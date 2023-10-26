@@ -93,16 +93,11 @@ class StableDiffusionManager:
         device = env.CUDA_DEVICE
 
         generator = self._get_generator(task, device)
-        with torch.autocast("cuda" if device != "cpu" else "cpu"):
-            task = task.dict()
-            del task["seed"]
-            images = pipeline(
-                prompt='multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.',
-                num_inference_steps=10
-            ).images
-            images[0].save("astronaut.png")
-            if device != "cpu":
-                torch.cuda.empty_cache()
+        task = task.dict()
+        del task["seed"]
+        images = pipeline(**task, generator=generator).images
+        if device != "cpu":
+            torch.cuda.empty_cache()
 
         return [images]
 
