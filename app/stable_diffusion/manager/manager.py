@@ -46,7 +46,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion",
     )
 
-    pipe.load_lora_weights("./lora/anime_sdxl_v1.safetensors", weight_name="anime_sdxl_v1.safetensors", adapter_name='anime')
+
 
     # pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     # pipe.safety_checker = lambda images, clip_input: (images, False)
@@ -57,6 +57,11 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     # pipe.enable_model_cpu_offload()
     # pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead", fullgraph=True)
     pipe = pipe.to(device)
+    pipe.load_lora_weights("./lora/anime_sdxl_v1.safetensors", weight_name="anime_sdxl_v1.safetensors",
+                           adapter_name='anime')
+    active_adapters = pipe.get_active_adapters()
+
+    logger.info(f"{active_adapters}")
     return pipe
 
 
