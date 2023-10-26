@@ -53,9 +53,9 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     if enable_attention_slicing:
         pipe.enable_attention_slicing()
 
-    pipe.enable_model_cpu_offload()
-    pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead", fullgraph=True)
-    # pipe = pipe.to(device)
+    # pipe.enable_model_cpu_offload()
+    # pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead", fullgraph=True)
+    pipe = pipe.to(device)
     return pipe
 
 
