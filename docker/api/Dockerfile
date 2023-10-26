@@ -4,7 +4,8 @@ WORKDIR /app
 RUN apt-get update && apt install -y \
     libgl1-mesa-glx \
     curl  \
-    libglib2.0-0 && apt-get clean 
+    git  \
+    libglib2.0-0 && apt-get clean
 
 
 COPY  requirements.txt .
