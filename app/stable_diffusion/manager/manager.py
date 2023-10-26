@@ -43,7 +43,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         variant="fp16",
         use_safetensors=True,
         # revision="fp16",
-        custom_pipeline="lpw_stable_diffusion_xl",
+        custom_pipeline="lpw_stable_diffusion",
     )
 
 
