@@ -94,7 +94,7 @@ class StableDiffusionManager:
         with torch.autocast("cuda" if device != "cpu" else "cpu"):
             task = task.dict()
             del task["seed"]
-            images = pipeline(**task, generator=generator).images
+            images = pipeline(prompt='charturnerv2, multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.', num_inference_steps=50).images
             if device != "cpu":
                 torch.cuda.empty_cache()
 
