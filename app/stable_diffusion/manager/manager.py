@@ -40,7 +40,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     pipe = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
-        revision="fp16",
+        variant="fp16",
         custom_pipeline="lpw_stable_diffusion",
     )
 
