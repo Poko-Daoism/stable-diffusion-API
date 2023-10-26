@@ -40,8 +40,10 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     pipe = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
-        revision="fp16",
-        custom_pipeline="lpw_stable_diffusion",
+        variant="fp16",
+        use_safetensors=True,
+        # revision="fp16",
+        # custom_pipeline="lpw_stable_diffusion",
     )
 
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
