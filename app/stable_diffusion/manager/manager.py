@@ -48,7 +48,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     )
 
     img2img = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-        repo,
+        'stabilityai/stable-diffusion-xl-refiner-1.0',
         torch_dtype=torch.float16,
         variant="fp16",
         use_safetensors=True,
@@ -56,7 +56,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion_xl",
     )
 
-    text2img.safety_checker = lambda images, clip_input: (images, False)
+    # text2img.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
         text2img.enable_attention_slicing()
