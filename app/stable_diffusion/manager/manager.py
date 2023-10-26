@@ -91,12 +91,11 @@ class StableDiffusionManager:
         device = env.CUDA_DEVICE
 
         generator = self._get_generator(task, device)
-        with torch.autocast("cuda" if device != "cpu" else "cpu"):
-            task = task.dict()
-            del task["seed"]
-            images = pipeline(**task, generator=generator).images
-            if device != "cpu":
-                torch.cuda.empty_cache()
+        task = task.dict()
+        del task["seed"]
+        images = pipeline(**task, generator=generator).images
+        if device != "cpu":
+            torch.cuda.empty_cache()
 
         return [images]
 
