@@ -2,6 +2,7 @@ import os
 from functools import lru_cache
 import typing as T
 import torch
+from loguru import logger
 
 torch.backends.cudnn.benchmark = True
 import sys
@@ -37,6 +38,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
+    logger.info(f"Repo: {repo}")
     pipe = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
@@ -47,8 +49,8 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
     )
 
 
-    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    pipe.safety_checker = lambda images, clip_input: (images, False)
+    # pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    # pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
         pipe.enable_attention_slicing()
@@ -94,7 +96,11 @@ class StableDiffusionManager:
         with torch.autocast("cuda" if device != "cpu" else "cpu"):
             task = task.dict()
             del task["seed"]
-            images = pipeline(prompt='charturnerv2, multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.', num_inference_steps=50).images
+            images = pipeline(
+                prompt='multiple views of the same character in the same outfit, a character turnaround of a woman wearing a black jacket and red shirt, best quality, intricate details.',
+                num_inference_steps=10,
+                seed=1232323,
+            ).images
             if device != "cpu":
                 torch.cuda.empty_cache()
 
