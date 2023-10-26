@@ -6,6 +6,7 @@ pipe = StableDiffusionXLPipeline.from_pretrained(
 )
 pipe.to("cuda")
 
-prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-image = pipe(prompt=prompt).images[0]
-image[0].save("astronaut1.png")
+with torch.autocast("cuda"):
+    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+    image = pipe(prompt=prompt).images[0]
+    image[0].save("astronaut1.png")
