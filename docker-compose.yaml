@@ -22,7 +22,7 @@ services:
       CUDA_DEVICE: cuda
       HUGGINGFACE_TOKEN: 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
       IMAGESERVER_URL: http://44.192.70.46:3000/images
-      MB_TIMEOUT: 120
+      MB_TIMEOUT: 200
       SAVE_DIR: static
 
     deploy:
