@@ -17,7 +17,7 @@ services:
       - ./static:/app/static
     environment:
       MODEL_ID: "stabilityai/stable-diffusion-xl-base-1.0"
-      MB_BATCH_SIZE: 1
+      MB_BATCH_SIZE: 2
 
       CUDA_DEVICE: cuda
       HUGGINGFACE_TOKEN: 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
