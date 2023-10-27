@@ -7,7 +7,7 @@ torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionImg2ImgPipeline, StableDiffusionInpaintPipeline
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -37,7 +37,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
-    pipe = DiffusionPipeline.from_pretrained(
+    stable_diffusion_txt2img = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
         variant="fp16",
@@ -46,21 +46,30 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion",
     )
 
-    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    stable_diffusion_txt2img.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     # pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
-        pipe.enable_attention_slicing()
+        stable_diffusion_txt2img.enable_attention_slicing()
 
     # pipe.enable_model_cpu_offload()
     # pipe.unet = torch.compile(pipe.unet, mode="reduce-overhead", fullgraph=True)
-    pipe = pipe.to(device)
-    pipe.load_lora_weights("./lora/anime_sdxl_v1.safetensors", weight_name="anime_sdxl_v1.safetensors",
+    stable_diffusion_txt2img = stable_diffusion_txt2img.to(device)
+    stable_diffusion_txt2img.load_lora_weights("./lora/anime_sdxl_v1.safetensors", weight_name="anime_sdxl_v1.safetensors",
                            adapter_name='anime')
-    active_adapters = pipe.get_active_adapters()
+    active_adapters = stable_diffusion_txt2img.get_active_adapters()
+
+    # img to img
+    components = stable_diffusion_txt2img.components
+    stable_diffusion_img2img = StableDiffusionImg2ImgPipeline(**components)
+    stable_diffusion_inpaint = StableDiffusionInpaintPipeline(**components)
 
     logger.info(f"{active_adapters}")
-    return pipe
+    return dict(
+        text2img=stable_diffusion_txt2img,
+        img2img=stable_diffusion_img2img,
+        inpaint=stable_diffusion_inpaint,
+    )
 
 
 build_pipeline(
@@ -86,11 +95,11 @@ class StableDiffusionManager:
         task = batch[0]
         pipeline = self.pipe
         if isinstance(task, Text2ImageTask):
-            pipeline = self.pipe
+            pipeline = self.pipe['text2img']
         elif isinstance(task, Image2ImageTask):
-            pipeline = self.pipe.img2img
+            pipeline = self.pipe['img2img']
         elif isinstance(task, InpaintTask):
-            pipeline = self.pipe.inpaint
+            pipeline = self.pipe['inpaint']
         else:
             raise NotImplementedError
 
