@@ -46,7 +46,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion",
     )
 
-    stable_diffusion_txt2img.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    stable_diffusion_txt2img.scheduler = DPMSolverMultistepScheduler.from_config(stable_diffusion_txt2img.scheduler.config)
     # pipe.safety_checker = lambda images, clip_input: (images, False)
 
     if enable_attention_slicing:
