@@ -7,7 +7,7 @@ torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionImg2ImgPipeline, StableDiffusionInpaintPipeline
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionImg2ImgPipeline, StableDiffusionInpaintPipeline
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -37,7 +37,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
-    stable_diffusion_txt2img = StableDiffusionPipeline.from_pretrained(
+    stable_diffusion_txt2img = DiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
         variant="fp16",
@@ -46,13 +46,29 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion",
     )
 
-    # img to img
-    components = stable_diffusion_txt2img.components
-    stable_diffusion_img2img = StableDiffusionImg2ImgPipeline(**components)
-    stable_diffusion_inpaint = StableDiffusionInpaintPipeline(**components)
-
     stable_diffusion_txt2img.scheduler = DPMSolverMultistepScheduler.from_config(stable_diffusion_txt2img.scheduler.config)
-    # pipe.safety_checker = lambda images, clip_input: (images, False)
+    stable_diffusion_txt2img.safety_checker = lambda images, clip_input: (images, False)
+
+    stable_diffusion_img2img = StableDiffusionImg2ImgPipeline(
+        vae=stable_diffusion_txt2img.vae,
+        text_encoder=stable_diffusion_txt2img.text_encoder,
+        tokenizer=stable_diffusion_txt2img.tokenizer,
+        unet=stable_diffusion_txt2img.unet,
+        scheduler=stable_diffusion_txt2img.scheduler,
+        safety_checker=None,
+        feature_extractor=None,
+        requires_safety_checker=False,
+    )
+    stable_diffusion_inpaint = StableDiffusionInpaintPipeline(
+        vae=stable_diffusion_txt2img.vae,
+        text_encoder=stable_diffusion_txt2img.text_encoder,
+        tokenizer=stable_diffusion_txt2img.tokenizer,
+        unet=stable_diffusion_txt2img.unet,
+        scheduler=stable_diffusion_txt2img.scheduler,
+        safety_checker=None,
+        feature_extractor=None,
+        requires_safety_checker=False,
+    )
 
     if enable_attention_slicing:
         stable_diffusion_txt2img.enable_attention_slicing()
