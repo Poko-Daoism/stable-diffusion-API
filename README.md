@@ -214,3 +214,23 @@ docker-compsoe up -d  frontend
 - [CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion)
 - [huggingface, stable-diffusion](https://huggingface.co/CompVis)
 - [teamhide/fastapi-boilerplate](https://github.com/teamhide/fastapi-boilerplate)
+
+
+```shell
+accelerate launch --mixed_precision="fp16"  train_text_to_image_lora.py \
+  --pretrained_model_name_or_path=stabilityai/stable-diffusion-xl-base-1.0 \
+  --dataset_name=/images/lisa \
+  --dataloader_num_workers=4 \
+  --resolution=512 --center_crop --random_flip \
+  --train_batch_size=1 \
+  --gradient_accumulation_steps=4 \
+  --max_train_steps=15000 \
+  --learning_rate=1e-04 \
+  --max_grad_norm=1 \
+  --lr_scheduler="cosine" --lr_warmup_steps=0 \
+  --output_dir=/lora/lisa \
+  --report_to=wandb \
+  --checkpointing_steps=500 \
+  --validation_prompt="lisa from black pink" \
+  --seed=1337
+```

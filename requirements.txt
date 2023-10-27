@@ -14,3 +14,5 @@ ftfy
 omegaconf
 safetensors
 invisible-watermark>=0.2.0
+datasets
+torchvision
