@@ -7,7 +7,7 @@ torch.backends.cudnn.benchmark = True
 import sys
 from random import randint
 from service_streamer import ThreadedStreamer
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionImg2ImgPipeline, StableDiffusionInpaintPipeline
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionImg2ImgPipeline, StableDiffusionInpaintPipeline
 
 from app.stable_diffusion.manager.schema import (
     InpaintTask,
@@ -37,7 +37,7 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         dump_path = repo[:-5]
         repo = conver_ckpt_to_diff(ckpt_path=repo, dump_path=dump_path)
 
-    stable_diffusion_txt2img = DiffusionPipeline.from_pretrained(
+    stable_diffusion_txt2img = StableDiffusionPipeline.from_pretrained(
         repo,
         torch_dtype=torch.float16,
         variant="fp16",
