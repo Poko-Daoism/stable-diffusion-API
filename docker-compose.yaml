@@ -21,7 +21,7 @@ services:
 
       CUDA_DEVICE: cuda
       HUGGINGFACE_TOKEN: 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
-      IMAGESERVER_URL: http://35.172.121.246:3000/images
+      IMAGESERVER_URL: http://34.237.51.230:3000/images
       MB_TIMEOUT: 200
       SAVE_DIR: static
 
@@ -49,6 +49,6 @@ services:
       - 8501
     environment:
       TZ: Asia/Seoul
-      API_URL: http://35.172.121.246:3000
+      API_URL: http://34.237.51.230:3000
       ST_TITLE: Stable-diffusion
       ST_WIDE: "True"
