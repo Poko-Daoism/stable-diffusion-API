@@ -46,6 +46,11 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
         # custom_pipeline="lpw_stable_diffusion",
     )
 
+    # img to img
+    components = stable_diffusion_txt2img.components
+    stable_diffusion_img2img = StableDiffusionImg2ImgPipeline(**components)
+    stable_diffusion_inpaint = StableDiffusionInpaintPipeline(**components)
+
     stable_diffusion_txt2img.scheduler = DPMSolverMultistepScheduler.from_config(stable_diffusion_txt2img.scheduler.config)
     # pipe.safety_checker = lambda images, clip_input: (images, False)
 
@@ -59,10 +64,8 @@ def build_pipeline(repo: str, device: str, enable_attention_slicing: bool):
                            adapter_name='anime')
     active_adapters = stable_diffusion_txt2img.get_active_adapters()
 
-    # img to img
-    components = stable_diffusion_txt2img.components
-    stable_diffusion_img2img = StableDiffusionImg2ImgPipeline(**components)
-    stable_diffusion_inpaint = StableDiffusionInpaintPipeline(**components)
+    stable_diffusion_img2img = stable_diffusion_img2img.to(device)
+    stable_diffusion_inpaint = stable_diffusion_inpaint.to(device)
 
     logger.info(f"{active_adapters}")
     return dict(
