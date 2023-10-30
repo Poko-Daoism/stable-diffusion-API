@@ -123,15 +123,15 @@ class StableDiffusionManager:
 
         n_steps = 40
         high_noise_frac = 0.8
-
+        task = task.dict()
         image = pipeline(
-            prompt='8k picture of new york photoshoot with lisa from blackpink in street style, photorealistic, highly detailed',
-            num_inference_steps=40,
+            prompt=task['prompt'],
+            num_inference_steps=n_steps,
             denoising_end=high_noise_frac,
             output_type="latent",
         ).images
         images = self.pipe['img2img'](
-            prompt='8k picture of new york photoshoot with lisa from blackpink in street style, photorealistic, highly detailed',
+            prompt=task['prompt'],
             num_inference_steps=n_steps,
             denoising_start=high_noise_frac,
             image=image,
