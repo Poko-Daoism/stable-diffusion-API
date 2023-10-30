@@ -141,8 +141,8 @@ class StableDiffusionManager:
         # task = task.dict()
         # del task["seed"]
         # images = pipeline(**task, generator=generator).images
-        # if device != "cpu":
-        #     torch.cuda.empty_cache()
+        if device != "cpu":
+            torch.cuda.empty_cache()
 
         return [images]
 
