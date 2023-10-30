@@ -122,14 +122,18 @@ class StableDiffusionManager:
         device = env.CUDA_DEVICE
 
         high_noise_frac = 0.8
+        generator = self._get_generator(task, device)
         task = task.dict()
+        del task["seed"]
         image = pipeline(
             **task,
+            generator=generator,
             denoising_end=high_noise_frac,
             output_type="latent",
         ).images
         images = self.pipe['img2img'](
             **task,
+            generator=generator,
             denoising_start=high_noise_frac,
             image=image,
         ).images
