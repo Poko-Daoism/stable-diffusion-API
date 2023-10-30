@@ -132,7 +132,8 @@ class StableDiffusionManager:
             output_type="latent",
         ).images
         images = self.pipe['img2img'](
-            **task,
+            prompt=task['prompt'],
+            negative_prompt=task['negative_prompt'],
             generator=generator,
             denoising_start=high_noise_frac,
             image=image,
