@@ -125,13 +125,13 @@ class StableDiffusionManager:
         high_noise_frac = 0.8
         task = task.dict()
         image = pipeline(
-            prompt=task['prompt'],
+            **task,
             num_inference_steps=n_steps,
             denoising_end=high_noise_frac,
             output_type="latent",
         ).images
         images = self.pipe['img2img'](
-            prompt=task['prompt'],
+            **task,
             num_inference_steps=n_steps,
             denoising_start=high_noise_frac,
             image=image,
