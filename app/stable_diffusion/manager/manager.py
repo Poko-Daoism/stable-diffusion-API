@@ -121,18 +121,15 @@ class StableDiffusionManager:
 
         device = env.CUDA_DEVICE
 
-        n_steps = 40
         high_noise_frac = 0.8
         task = task.dict()
         image = pipeline(
             **task,
-            num_inference_steps=n_steps,
             denoising_end=high_noise_frac,
             output_type="latent",
         ).images
         images = self.pipe['img2img'](
             **task,
-            num_inference_steps=n_steps,
             denoising_start=high_noise_frac,
             image=image,
         ).images
