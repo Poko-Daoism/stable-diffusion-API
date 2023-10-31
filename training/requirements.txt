@@ -1,0 +1,13 @@
+service-streamer==0.1.2
+loguru==0.6.0  
+gunicorn==20.1.0
+pydantic==1.9.2
+diffusers
+transformers
+accelerate
+scipy
+ftfy
+omegaconf
+safetensors
+datasets
+torchvision
